@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <title>制作标题工具-5Home资源社区</title>
+    <link rel="stylesheet" type="text/css" href="./static/css/index.css">
+    <style type="text/css">
+    body {
+        background-color: #f4f6f9;
+    }
+
+    .mt-10 {
+        margin-top: 10px !important;
+    }
+
+    .mt-5 {
+        margin-top: 5px !important;
+    }
+
+    .mb-5 {
+        margin-bottom: 5px !important;
+    }
+
+    .mb-10 {
+        margin-bottom: 10px !important;
+    }
+
+    .mb-20 {
+        margin-bottom: 20px !important;
+    }
+
+    .mt–20 {
+        margin-top: 20px !important;
+    }
+
+    .el-card__header {
+        padding: 15px 17px;
+    }
+
+    .el-tag+.el-tag {
+        margin-left: 10px;
+    }
+
+    .button-new-tag {
+        margin-left: 10px;
+        height: 32px;
+        line-height: 30px;
+        padding-top: 0;
+        padding-bottom: 0;
+    }
+
+    .input-new-tag {
+        width: 90px;
+        margin-left: 10px;
+        vertical-align: bottom;
+    }
+
+    .list-group-item {
+        cursor: move;
+    }
+    .edit {
+      display: flex;
+      height: 300px;
+    }
+    .edit-content {
+      padding:10px 8px;
+      width:100%;
+      height:100%;
+      font-size: 12px;
+      line-height: 24px;
+      color: black;
+      font-family: inherit;
+      border:1px solid #eaeaea;
+      background: rgb(255, 255, 255, 1);
+      box-sizing: border-box;
+      outline:none;
+      resize: none;
+    }
+    .left-box {
+      width: 40px;
+      height:100%;
+      text-align:left;
+    }
+    .left-num {
+      padding:10px 4px;
+      height:100%;
+      width: 100%;
+      line-height: 24px;
+      font-size: 12px;
+      text-align: right;
+      color: #999;
+      font-weight: bold;
+      resize: none;
+      outline:none;
+      overflow-y: hidden;
+      overflow-x: hidden;
+      border: 0;
+      background:rgba(199, 208, 220, 1);
+      box-sizing: border-box;
+    }
+    </style>
+</head>
+
+<body>
+    <div id="app">
+        <el-row :gutter="10">
+            <el-col :md="12">
+                <el-row :gutter="10">
+                    <el-col :md="8" class="mb-10" v-for="(word, i) in list">
+                        <el-card class="box-card">
+                            <div slot="header" class="clearfix">
+                                <el-input v-model="word.title" placeholder="请输入内容" size="small" style="width: 200px"></el-input>
+                                <el-button style="float: right; padding: 3px 0" type="text" @click="handleDeleteOther(i)">删除</el-button>
+                            </div>
+                            <div class="edit">
+                                <div class="left-box"><textarea class="left-num" :id="'left-num-' + i" wrap="off" cols="2" disabled v-model="word.lineNumber"></textarea></div>
+                                <textarea :onscroll="'document.getElementById(\'left-num-' + i + '\').scrollTop = this.scrollTop;'" v-model="word.content" wrap="off" class="edit-content" rows="20" @input="handleTextareaInput($event, word)"></textarea>
+                            </div>
+                        </el-card>
+                    </el-col>
+                </el-row>
+                <el-row :gutter="10">
+                    <el-col :md="8">
+                        <el-button class="mt-5" icon="el-icon-circle-plus-outline" @click="handleAddOther">添加其他词</el-button>                   
+                    </el-col>
+                </el-row>
+            </el-col>
+            <el-col :md="12">
+                <el-card class="box-card">
+                    <div slot="header" class="clearfix">
+                        <span>标题</span>
+                    </div>
+                    <div class="mb-20" style="overflow: hidden;">
+                        <div class="mb-5">规则</div>
+                        <div class="mb-20">
+                            <div style="float:left">
+                                <draggable v-model="dynamicTags" group="people" @start="drag=true" @end="drag=false">
+                                    <el-tag class="list-group-item" :key="tag" v-for="(tag, index) in dynamicTags" closable :disable-transitions="false" @close="handleClose(index)">
+                                        {{tag}}
+                                    </el-tag>
+                                </draggable>
+                            </div>
+                            <div style="float:left">
+                                <el-autocomplete class="input-new-tag" v-if="inputVisible" v-model="inputValue" ref="saveTagInput" size="small" :fetch-suggestions="querySearch" @select="handleInputConfirm()">
+                                </el-autocomplete>
+                                <el-button v-else class="button-new-tag" size="small" @click="showInput">+ 其他</el-button>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="clear:both;"></div>
+                    <el-input v-model="title" v-for="title in titles" class="mt-5" :maxlength="maxLength" show-word-limit></el-input>
+                    
+                    <el-input-number v-model="maxLength" :step="5"></el-input-number>
+
+                    <el-button class="mt–20" type="primary" @click="randomGenerate">生成</el-button>
+                    <download-excel :data="json_data" :fields="json_fields" style="display: inline-block;">
+                        <el-button class="mt-5" icon="el-icon-tickets" @click="handleExport">导出</el-button>
+                    </download-excel>
+                    <el-input v-model.number="exportRows" style="width:80px"></el-input> 行
+                </el-card>
+            </el-col>
+        </el-row>
+    </div>
+    <script type="text/javascript" src="./static/js/vue.min.js"></script>
+    <script type="text/javascript" src="./static/js/index.js"></script>
+    <script type="text/javascript" src="./static/js/Sortable.min.js"></script>
+    <script type="text/javascript" src="./static/js/vuedraggable.umd.min.js"></script>
+    <script type="text/javascript" src="./static/js/vue-json-excel.umd.js"></script>
+    <script>
+    if (typeof window !== "undefined" && "Vue" in window) {
+        window.Vue.component("downloadExcel", JsonExcel);
+    }
+    const preset = ['热搜词', '卖点', '类目词']
+    new Vue({
+        el: '#app',
+        data: {
+            list: [],
+            titles: [],
+            maxLength: 115,
+            ignore_capital_letters: ["a", "an", "and", "or", "for", "on", "the", "with"],
+            dynamicTags: [],
+            inputVisible: false,
+            inputValue: '',
+            json_fields: {},
+            json_data: [],
+            exportRows: 10000
+        },
+        created() {
+            document.body.ondrop = function(event) {
+                event.preventDefault();
+                event.stopPropagation();
+            }
+            const fileName = this.getFileName()
+            try {
+                this.list = JSON.parse(window.localStorage.getItem(fileName + 'list') || [])
+                this.dynamicTags = JSON.parse(window.localStorage.getItem(fileName + 'tags') || [])
+                for(const word of this.list) {
+                    this.handleTextareaInput(null, word)
+                }
+            } catch (err) {}
+            if (this.list.length == 0) {
+                for (let p of preset) {
+                    this.list.push({ title: p, content: '' })
+                }
+            }
+            if (this.dynamicTags.length == 0) {
+                for (let p of preset) {
+                    this.dynamicTags.push(p)
+                }
+            }
+            
+        },
+        methods: {
+            getFileName(){
+                var arr = location.href.split('/');
+                var fileName = arr[arr.length - 1];
+                return fileName
+            },
+            handleTextareaInput(e, word) {
+              let str = word.content
+              if(str) {
+                str = str.replace(/\r/gi, '');
+                const arr = str.split('\n')
+ 
+                let lineNumber = ''
+                for(let i = 1;i <= arr.length; i++){
+                  lineNumber += i + '\n'
+                }
+                this.$set(word, 'lineNumber', lineNumber)
+              }
+            },
+            gen(arr) {
+                if(!arr || arr.length == 0) return ''
+                let index = Math.floor(Math.random() * arr.length)
+                let result = this.trim(arr[index]) + ' '
+                arr.splice(index, 1)
+                return result
+            },
+            makeString(object) {
+                if (object == null) return ''
+                return '' + object
+            },
+            isBlank(str) {
+                return (/^\s*$/).test(this.makeString(str))
+            },
+            trim(str) {
+                if (!str) return ''
+                var characters = '\\s';
+                return str.replace(new RegExp('^' + characters + '+|' + characters + '+$', 'g'), '');
+            },
+            capitalize(str) {
+                return str.charAt(0).toUpperCase() + str.slice(1);
+            },
+            capitalizeTitle(title) {
+                let newStr = []
+                let split = title.split(' ');
+                for (let word of split) {
+                    if (this.ignore_capital_letters.includes(word.toLowerCase())) {
+                        word = word.toLowerCase();
+                    } else {
+                        word = this.capitalize(word.toLowerCase());
+                    }
+                    if (word.indexOf("-") != -1) {
+                        let split2 = word.split("-");
+                        if (split2.length > 1) {
+                            word = split2[0] + "-" + this.capitalize(split2[1]);
+                        }
+                    }
+                    newStr.push(this.trim(word))
+                }
+                return newStr.join(" ");
+            },
+            handleAddOther() {
+                this.list.push({ title: '', content: '' })
+            },
+            handleDeleteOther(i) {
+                this.list.splice(i, 1)
+            },
+            handleClose(index) {
+                this.dynamicTags.splice(index, 1);
+            },
+            showInput() {
+                this.inputVisible = true;
+                this.$nextTick(_ => {
+                    this.$refs.saveTagInput.$refs.input.focus();
+                });
+            },
+            handleInputConfirm() {
+                let inputValue = this.inputValue;
+                if (inputValue) {
+                    this.dynamicTags.push(inputValue);
+                }
+                this.inputVisible = false;
+                this.inputValue = '';
+            },
+            querySearch(queryString, cb) {
+                let results = []
+                for (const e of this.list) {
+                    results.push({ value: e.title })
+                }
+                cb(results);
+            },
+            getMax() {
+                let map = {}
+                for (const e of this.list) {
+                    map[e.title] = e.content.split(/[(\r\n)\r\n]+/).filter(e => !this.isBlank(e)).length
+                }
+                let max = 1
+                for (const tag of this.dynamicTags) {
+                    if(map[tag]) {
+                        max = max * map[tag]
+                    }
+                }
+                return max
+            },
+            handleExport() {
+                this.json_fields = {}
+                this.json_data = []
+                this.json_fields['标题'] = '标题'
+                let max = this.exportRows
+                let exist = []
+                for (let i = 0; i < max; i++) {
+                    const data = {}
+                    let map = {}
+                    for (const e of this.list) {
+                        map[e.title] = e.content.split(/[(\r\n)\r\n]+/).filter(e => !this.isBlank(e))
+                    }
+                    let t = ''
+                    for (const tag of this.dynamicTags) {
+                        t = t + this.gen(map[tag])
+                    }
+                    if(t.length > 180) {
+                        // continue
+                    }
+                    let title = this.trim(this.capitalizeTitle(t))
+                    if(exist.indexOf(title) != -1) {
+                        continue
+                    }
+                    exist.push(title)
+                    data['标题'] = title
+                    this.json_data.push(data)
+                }
+                const fileName = this.getFileName()
+                window.localStorage.setItem(fileName + 'list', JSON.stringify(this.list))
+                window.localStorage.setItem(fileName + 'tags', JSON.stringify(this.dynamicTags))
+            },
+            randomGenerate() {
+                this.titles = []
+
+                for (let i = 0; i < 10; i++) {
+                    let map = {}
+                    for (const e of this.list) {
+                        map[e.title] = e.content.split(/[(\r\n)\r\n]+/).filter(e => !this.isBlank(e))
+                    }
+                    let t = ''
+                    for (const tag of this.dynamicTags) {
+                        t = t + this.gen(map[tag])
+                    }
+                    this.titles.push(this.trim(this.capitalizeTitle(t)))
+                }
+                const fileName = this.getFileName()
+                window.localStorage.setItem(fileName + 'list', JSON.stringify(this.list))
+                window.localStorage.setItem(fileName + 'tags', JSON.stringify(this.dynamicTags))                
+            }
+        },
+    });
+    </script>
+</body>
+
+</html>
