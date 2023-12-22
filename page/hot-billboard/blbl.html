@@ -94,7 +94,7 @@
 
     <script>
         window.onload = function() {
-            fetch("https://api.lewz.cn/api/jhrs?type=bilihot")
+            fetch("http://api.lewz.cn/api/jhrs?type=bilihot")
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
