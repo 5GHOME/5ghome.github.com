@@ -19,9 +19,20 @@
 </head>
 <body>
     <div class="main-wrap">
-        <video ishivideo="true" autoplay="true" isrotate="false" autoHide="true">
-            <source src="./video/meinv-066.mp4" type="video/mp4">
-        </video>
+            <video id="videoPlayer" ishivideo="true" autoplay="true" isrotate="false" autoHide="true" controls width="640" height="480" type="video/mp4"></video>
     </div>
+    <script>
+    fetch('video-link.txt') // 读取txt文件
+        .then(response => response.text()) // 将响应转换为文本
+        .then(data => {
+            const links = data.split('\n'); // 将文本分割成链接数组
+            const randomLink = links[Math.floor(Math.random() * links.length)]; // 随机选择一个链接
+            const videoElement = document.getElementById('videoPlayer'); // 获取视频元素
+            videoElement.src = randomLink; // 设置视频源为随机链接
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+</script>
 </body>
 </html>
