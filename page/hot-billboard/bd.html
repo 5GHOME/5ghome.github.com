@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>热榜单页</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 20px;
+        }
+
+        h1 {
+            color: #333;
+            font-size: 24px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        h2 {
+            color: #666;
+            font-size: 18px;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        p {
+            color: #999;
+            font-size: 14px;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        ul {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+
+        li {
+            background-color: #fff;
+            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 10px;
+        }
+
+        a {
+            color: #333;
+            text-decoration: none;
+        }
+
+        a:hover {
+            color: #ff6600;
+        }
+            /*手机端底部菜单*/
+        #navigation {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            height: 60px;
+            background-color: #f2f2f2;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+        }
+
+        .nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        .nav-icon {
+            width: 30px;
+            height: 30px;
+            margin-bottom: 5px;
+        }
+
+        .nav-label {
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1 id="title"></h1>
+    <h2 id="subtitle"></h2>
+    <p id="update_time"></p>
+    <ul id="hot_list"></ul><br/><br/><br/>
+
+    <script>
+        window.onload = function () {
+            fetch("https://api.lewz.cn/api/jhrs?type=baidu")
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        document.getElementById("title").innerText = data.title;
+                        document.getElementById("subtitle").innerText = data.subtitle;
+                        document.getElementById("update_time").innerText = "更新时间：" + data.update_time;
+
+                        const hotList = document.getElementById("hot_list");
+                        for (let i = 0; i < data.data.length; i++) {
+                            const item = data.data[i];
+                            const li = document.createElement("li");
+                            
+
+                            const a = document.createElement("a");
+                            a.href = item.url;
+                            a.target = "_blank";
+                            a.innerText = `${item.index}. ${item.title} (${item.hot})`;
+                            li.appendChild(a);
+
+                            const desc = document.createElement("p");
+                            desc.innerText = item.desc;
+                            li.appendChild(desc);
+
+                            hotList.appendChild(li);
+                        }
+                    } else {
+                        console.error("请求失败");
+                    }
+                })
+                .catch(error => console.error(error));
+        };
+    </script>
+        <div id="navigation">
+        <div  class="nav-item">
+             <a href="blbl.html">
+            <img class="nav-icon" src="img/b458c93f9a0d2.png" alt="Button 1">
+            </a>
+        </div>
+        <div class="nav-item">
+            <a href="index.html">
+            <img class="nav-icon" src="img/45edaa5d0f325.png" alt="Button 2"></a>
+        </div>
+        <div class="nav-item">
+            <a href="bd.html">
+            <img class="nav-icon" src="img/e6ba25af3f1b6.png" alt="Button 3"></a>
+        </div>
+    </div>
+</body>
+</html>
